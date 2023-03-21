@@ -1,20 +1,11 @@
-import torchvision
-from torch import nn
 import torch
 from torchvision import transforms
 from model.model_v8 import ResIUNet
-import numpy as np
-import cv2
 from utils import *
-from PIL import Image
 from torch.utils import model_zoo
 
 ienet_url = 'https://huggingface.co/Inubashiri/IENet/resolve/main/v8_isic.pth'
 classification_url = 'https://huggingface.co/Inubashiri/IENet/resolve/main/my_model(199).pkl'
-
-# classfication_model_path = r'E:\streamlit_skin\weight\my_model(199).pkl'
-# ienet_model_path = r'E:\streamlit_skin\weight\v8_isic.pth'
-
 
 classification_model = model_zoo.load_url(classification_url)
 classification_model.cuda()
