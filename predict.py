@@ -7,15 +7,20 @@ import numpy as np
 import cv2
 from utils import *
 from PIL import Image
+from torch.utils import model_zoo
 
-classfication_model_path = r'E:\streamlit_skin\weight\my_model(199).pkl'
-ienet_model_path = r'E:\streamlit_skin\weight\v8_isic.pth'
+ienet_url = 'https://huggingface.co/Inubashiri/IENet/resolve/main/v8_isic.pth'
+classification_url = 'https://huggingface.co/Inubashiri/IENet/resolve/main/my_model(199).pkl'
 
-classification_model = torch.load(classfication_model_path)
+# classfication_model_path = r'E:\streamlit_skin\weight\my_model(199).pkl'
+# ienet_model_path = r'E:\streamlit_skin\weight\v8_isic.pth'
+
+
+classification_model = model_zoo.load_url(classification_url)
 classification_model.cuda()
 
 ienet = ResIUNet()
-ienet.load_state_dict(torch.load(ienet_model_path))
+ienet.load_state_dict(model_zoo.load_url(ienet_url))
 ienet = ienet.cuda()
 
 
@@ -84,3 +89,10 @@ def get_pred(img):
     output = classification_model(processed_img)
     return post_processing(output)
 
+
+if __name__ == '__main__':
+    src = cv2.imread(r'E:\streamlit_skin\test\akiec1.jpg')
+    import time
+    start = time.time()
+    print(get_pred(src))
+    print('use', time.time() - start)
