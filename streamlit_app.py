@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from cv2 import cv2
+import cv2
 import os
 from predict import get_pred
 
