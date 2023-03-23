@@ -1,16 +1,34 @@
 import streamlit as st
 import numpy as np
+import io
 import cv2
+
 import os
 from predict import get_pred
+from display import show_home_page, show_principle_page, show_about
+
 
 
 class StreamlitShow:
     def __init__(self):
         self.images = []
+        select_dict = {'首页': show_home_page, '模型原理': show_principle_page, '体验app': self.app_page, '关于': show_about}
 
-        st.title('皮肤疾病自动分类工具')
         with st.sidebar:
+            self.set_page = st.selectbox(
+                '查看页面',
+                select_dict.keys())
+
+        st.title('皮肤自动分类工具')
+        select_dict[self.set_page]()
+
+
+    def app_page(self):
+        with st.sidebar:
+
+            self.display_mode = st.radio(
+                '选择一种查看图像的方式',
+                ('原图', '只看病灶', '病灶范围', '模糊背景', '合成结果'))
             self.browse()
 
         if self.images:
@@ -53,8 +71,17 @@ class StreamlitShow:
 
             st.text('预测结果如下 当前第{}张 / 共{}张'.format(select_cnt+1, len(self.images)))
             image = self.images[select_cnt]
-            st.image(image, channels="BGR")
-            res = get_pred(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+            res, img_list = get_pred(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+            if self.display_mode == '原图':
+                st.image(image, channels="BGR")
+            else:
+                d = {'只看病灶': img_list[1], '病灶范围': img_list[2], '合成结果': img_list[0], '模糊背景': img_list[3]}
+                show_image = cv2.resize(np.array(d[self.display_mode]), (image.shape[1], image.shape[0]))
+                print(image.shape)
+                st.image(show_image, channels="RGB")
+
             for i in range(3):
                 st.progress(res[i][0], text='{} (概率:{}%)'.format(res[i][1], '%.1f' % (res[i][0]*100)))
 

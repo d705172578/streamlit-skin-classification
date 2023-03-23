@@ -45,7 +45,10 @@ def seg_post_processing(img, prediction):
     y1 = np.max(locs[0])
 
     new_img = to_pil((tensor_blur * reverse_pred + mulmask)[:, y0:y1, x0:x1])
-    return new_img
+    disease_mask = to_pil(mulmask)
+    disease_crop = to_pil(img[:, y0:y1, x0:x1])
+    blur_bg = to_pil(tensor_blur * reverse_pred)
+    return new_img, disease_mask, disease_crop, blur_bg
 
 
 def seg_pred(img):
@@ -55,7 +58,7 @@ def seg_pred(img):
 
 
 def cls_pre_processing(img):
-    seg_img = seg_pred(img)
+    seg_img, disease_mask, disease_crop, blur_bg = seg_pred(img)
 
     transform = transforms.Compose([
         transforms.Resize((384, 384)),
@@ -65,10 +68,9 @@ def cls_pre_processing(img):
 
     transformed_image = transform(seg_img)
 
-    return torch.unsqueeze(transformed_image.to(torch.device('cuda:0')), 0)
+    return torch.unsqueeze(transformed_image.to(torch.device('cuda:0')), 0), seg_img, disease_mask, disease_crop, blur_bg
 
-
-def post_processing(output):
+def post_processing(output):        # 后处理
     name = ['光化性角化病', '基底细胞癌', '良性角化病', '皮肤纤维瘤', '黑色素瘤', '黑色素细胞性痣', '血管性皮肤病变']
     values, inds = torch.topk(torch.softmax(output, 1), 3)
     res = [[round(value.item(), 3), name[ind.item()]] for value, ind in zip(values[0], inds[0])]
@@ -76,9 +78,9 @@ def post_processing(output):
 
 
 def get_pred(img):
-    processed_img = cls_pre_processing(img)
+    processed_img, seg_img, disease_mask, disease_crop, blur_bg = cls_pre_processing(img)
     output = classification_model(processed_img)
-    return post_processing(output)
+    return post_processing(output), [seg_img, disease_mask, disease_crop, blur_bg]
 
 
 if __name__ == '__main__':
