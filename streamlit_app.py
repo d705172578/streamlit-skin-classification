@@ -1,12 +1,9 @@
 import streamlit as st
 import numpy as np
-import io
 import cv2
-
 import os
 from predict import get_pred
 from display import show_home_page, show_principle_page, show_about
-
 
 
 class StreamlitShow:
@@ -19,18 +16,18 @@ class StreamlitShow:
                 '查看页面',
                 select_dict.keys())
 
-        st.title('皮肤自动分类工具')
+        st.title('🩺皮肤自动分类工具🧬')
         select_dict[self.set_page]()
 
-
     def app_page(self):
+        # app页面的显示内容
         with st.sidebar:
-
             self.display_mode = st.radio(
                 '选择一种查看图像的方式',
                 ('原图', '只看病灶', '病灶范围', '模糊背景', '合成结果'))
             self.browse()
 
+        # 当传入图像时，显示图像，各类别概率以及切换图像按钮
         if self.images:
             col1, col2, col3 = st.columns([1, 3, 1])
             with col1:
@@ -51,10 +48,13 @@ class StreamlitShow:
 
             with col2:
                 self.show()
+
+        # 否则提示在左侧上传图像
         else:
-            st.text('在左侧添加想要预测的图片即可查看预测结果哦')
+            st.markdown('在左侧添加想要预测的图片即可查看预测结果哦')
 
     def get_cnt(self):
+        # 当前所在图像被存储在temporary files中，由于每次按钮都会重新运行程序，所以页数保存在外部文件中
         if not os.path.exists('temporary files/select.txt'):
             with open('temporary files/select.txt', 'w') as f:
                 f.write('0')
@@ -64,7 +64,6 @@ class StreamlitShow:
             res = min(len(self.images) - 1, int(f.readline()))
         return res
 
-
     def show(self):
         if self.images:
             select_cnt = self.get_cnt()
@@ -72,6 +71,7 @@ class StreamlitShow:
             st.text('预测结果如下 当前第{}张 / 共{}张'.format(select_cnt+1, len(self.images)))
             image = self.images[select_cnt]
 
+            # img_list存储了一系列的中间结果，可以用于显示中间信息，具体内容可以查看self.display_mode的相关代码
             res, img_list = get_pred(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
             if self.display_mode == '原图':
@@ -82,9 +82,11 @@ class StreamlitShow:
                 print(image.shape)
                 st.image(show_image, channels="RGB")
 
-            for i in range(3):
+            # 绘制概率条
+            for i in range(len(res)):
                 st.progress(res[i][0], text='{} (概率:{}%)'.format(res[i][1], '%.1f' % (res[i][0]*100)))
 
+    # 上传文件使用，可同时上传多个文件，保存在self.images中
     def browse(self):
         available_type = ['jpg', 'png', 'jpeg', 'webp', 'bmp', 'tiff']
         uploaded_files = st.file_uploader("请上传需要预测的皮肤疾病图像", type=available_type, accept_multiple_files=True)

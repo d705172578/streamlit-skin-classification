@@ -3,19 +3,21 @@ import cv2
 
 
 def show_home_page():
-    st.markdown('#### 欢迎！')
+    st.markdown('#### 👋欢迎！')
     st.markdown('这是一款简易的皮肤分类工具，他可以对你输入皮肤疾病图像进行自动分类，并给出排名前三的分类概率。')
     st.markdown('目前模型收录的皮肤疾病种类如下：')
     names = ['光化性角化病', '基底细胞癌', '良性角化病', '皮肤纤维瘤', '黑色素瘤', '黑色素细胞性痣', '血管性皮肤病变']
     english_names = ['Actinic keratoses', 'Basal cell carcinoma',  'Benign keratosis',  'Dermatofibroma',  'Melanoma', 'Vascular skin lesions']
     for name, english_name in zip(names, english_names):
         st.markdown(f'- {name}({english_name})')
-    st.markdown('你可以通过左边导航栏，查看这个工具的原理，或者体验一下网页端的app!')
+    st.markdown('你可以通过左边导航栏，查看这个工具的原理，或者体验一下网页端的app😊!')
+    st.text('')
+    st.write('🤷‍♂️:red[如果出现报错信息  “Failed to execute ‘removeChild‘ on ‘Node‘: The node to be removed is not a child of this node” ,请刷新页面重试或者换个浏览器。]')
 
 
 def show_principle_page():
     st.markdown('#### 1. 处理流程')
-    st.markdown('工具的处理流程如下图所示，在获取到图像后会先使用IENet进行分割，通过分割结果，获取病灶区域，轮廓，并对背景进行均值滤波')
+    st.markdown('工具的处理流程如下图所示，在获取到图像后会先使用IENet进行分割，通过分割结果，获取病灶区域，轮廓，并对背景进行均值滤波, 之后将这三种结果融合并传到分类网络中进行分类。')
     src = cv2.imread('E:\streamlit_skin\display\process.png')
     st.image(src, channels='BGR')
     st.text('')
@@ -43,11 +45,11 @@ def show_principle_page():
 
 
 def show_about():
-    st.markdown('#### 关于项目')
+    st.markdown('#### 关于项目🗂️')
     st.markdown('该项目代码目前发布在github上，链接如下:')
     st.markdown('[https://github.com/d705172578/streamlit-skin-classification](https://github.com/d705172578/streamlit-skin-classification)')
 
-    st.markdown('#### 关于作者')
+    st.markdown('#### 关于作者👨‍🎓')
     st.markdown('想了解更多该项目信息，可以联系作者')
-    st.markdown('邮箱: 705172578@qq.com')
-    st.markdown('微信: dbx19980106')
+    st.markdown('邮箱📧: 705172578@qq.com')
+    st.markdown('微信💬: dbx19980106')
